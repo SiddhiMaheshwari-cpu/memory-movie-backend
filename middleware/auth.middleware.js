@@ -20,9 +20,7 @@ const protect = async (req, res, next) => {
         message: "Access denied. No token provided.",
       });
     }
-    console.log("AUTH HEADER:", req.headers.authorization);
-    console.log("TOKEN:", token);
-
+    
     // Verify Token
 
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);

@@ -106,7 +106,35 @@ router.post(
   validate,
   login
 );
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     description: Clears the refresh token cookie and logs the user out.
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.post("/logout", logout);
+/**
+ * @swagger
+ * /api/auth/refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     description: Generates a new access token using the refresh token cookie.
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       200:
+ *         description: New access token generated
+ *       401:
+ *         description: Invalid or expired refresh token
+ */
 router.post("/refresh-token", refreshAccessToken);
 
 module.exports = router;
