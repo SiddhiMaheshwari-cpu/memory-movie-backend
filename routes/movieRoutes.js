@@ -5,13 +5,13 @@ const {
 } = require("../controllers/movieController");
 const { createVoiceOver } = require("../controllers/voiceOverController");
 const { renderMovie } = require("../controllers/movieRendererController");
+const { protect } = require("../middleware/auth.middleware");
 
-
-router.post("/movies", createMovie);
-router.get("/movies", getAllMovies);
-router.get("/movies/:id", getMovieById);
-router.put("/movies/:id", updateMovie);
-router.delete("/movies/:id", deleteMovie);
-router.post("/movies/:id/voice-over", createVoiceOver);
-router.post("/movies/:id/render", renderMovie);
+router.post("/movies", protect, createMovie);
+router.get("/movies", protect, getAllMovies);
+router.get("/movies/:id", protect, getMovieById);
+router.put("/movies/:id", protect, updateMovie);
+router.delete("/movies/:id", protect, deleteMovie);
+router.post("/movies/:id/voice-over", protect, createVoiceOver);
+router.post("/movies/:id/render", protect, renderMovie);
 module.exports = router;

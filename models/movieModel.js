@@ -11,6 +11,11 @@ const movieSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    owner: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  required: true,
+},
 
     photos: [
       {
@@ -212,6 +217,34 @@ const movieSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    status: {
+  type: String,
+  enum: [
+    "draft",
+    "uploaded",
+    "processing",
+    "completed",
+    "failed"
+  ],
+  default: "draft",
+},
+
+progress: {
+  type: Number,
+  default: 0,
+},
+
+stats: {
+  views: {
+    type: Number,
+    default: 0,
+  },
+
+  downloads: {
+    type: Number,
+    default: 0,
+  },
+},
   },
   {
     timestamps: true,

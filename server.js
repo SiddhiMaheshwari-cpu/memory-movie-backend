@@ -1,33 +1,106 @@
+require("dotenv").config();
 
-    
-    require("dotenv").config();
-    const express=require("express");
-    const app=express();
-    app.use(express.json());
-    const routes=require("./routes/testRoutes");
-    const movieRoutes=require("./routes/movieRoutes");
-    const aiRoutes=require("./routes/aiRoutes");
- 
-    const connectDB=require("./config/db");
+const express = require("express");
+const cookieParser = require("cookie-parser");
 
-    const uploadRoutes=require("./routes/uploadRoutes");
-    const cloudinary = require("./config/cloudinary");
-    const scenePlannerRoutes = require("./routes/scenePlannerRoutes");
+const helmet = require("helmet");
+const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 
-    const videoRendererRoutes = require("./routes/videoRendererRoutes");
-    
-    app.use("/api/test",routes);
-    app.use("/",movieRoutes);
-    app.use("/",uploadRoutes);
-    app.use("/",aiRoutes);
-    app.use("/movies", scenePlannerRoutes);
-    app.use("/movies", videoRendererRoutes);
-    connectDB();
+const app = express();
 
-           
-    const PORT=process.env.PORT || 5000;
-    app.listen(PORT,()=>{
-        console.log(`Server is running on port ${PORT}`);
-    });
+const errorHandler = require("./middleware/errorHandler");
 
-   
+const connectDB = require("./config/db");
+
+// Routes
+const routes = require("./routes/testRoutes");
+const movieRoutes = require("./routes/movieRoutes");
+const aiRoutes = require("./routes/aiRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
+const scenePlannerRoutes = require("./routes/scenePlannerRoutes");
+const videoRendererRoutes = require("./routes/videoRendererRoutes");
+const authRoutes = require("./routes/authroutes");
+const {swaggerUi, swaggerSpec}
+= require("./docs/swagger");
+
+
+// =======================
+// Middleware
+// =======================
+
+app.use(express.json());
+
+app.use(helmet());
+
+app.use(cors());
+
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: {
+      success: false,
+      message: "Too many requests, please try again later",
+    },
+  })
+);
+
+app.use(cookieParser());
+
+
+// =======================
+// Test Route
+// =======================
+
+app.post("/test", (req, res) => {
+  console.log("TEST BODY:", req.body);
+
+  res.json({
+    success: true,
+    body: req.body,
+  });
+});
+
+
+// =======================
+// API Routes
+// =======================
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec)
+);
+app.use("/api/auth", authRoutes);
+
+app.use("/api/test", routes);
+
+app.use("/", movieRoutes);
+
+app.use("/", uploadRoutes);
+
+app.use("/", aiRoutes);
+
+app.use("/movies", scenePlannerRoutes);
+
+app.use("/movies", videoRendererRoutes);
+
+
+// =======================
+// Error Handler (ALWAYS LAST)
+// =======================
+
+app.use(errorHandler);
+
+
+// =======================
+// Database + Server
+// =======================
+
+connectDB();
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
