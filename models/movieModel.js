@@ -217,38 +217,99 @@ const movieSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    scenePlan: {
+      type: Object,
+      default: {},
+    },
+
+    voiceOver: {
+      type: Object,
+      default: {},
+    },
+
+    moviePublicId: {
+      type: String,
+      default: "",
+    },
+
+    errorMessage: {
+      type: String,
+      default: "",
+    },
+
+    renderJob: {
+      status: {
+        type: String,
+        enum: ["idle", "queued", "processing", "completed", "failed"],
+        default: "idle",
+      },
+      stage: {
+        type: String,
+        default: "",
+      },
+      progress: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100,
+      },
+      startedAt: Date,
+      completedAt: Date,
+    },
+
+    duration: {
+      type: Number,
+      default: 0,
+    },
+
+    resolution: {
+      type: String,
+      default: "1920x1080",
+    },
+
     status: {
-  type: String,
-  enum: [
-    "draft",
-    "uploaded",
-    "processing",
-    "completed",
-    "failed"
-  ],
-  default: "draft",
-},
+      type: String,
+      enum: [
+        "created",
+        "draft",
+        "uploading",
+        "uploaded",
+        "analyzing",
+        "screenplay_generating",
+        "scene_planning",
+        "rendering",
+        "processing",
+        "completed",
+        "failed",
+      ],
+      default: "created",
+    },
 
-progress: {
-  type: Number,
-  default: 0,
-},
+    progress: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
 
-stats: {
-  views: {
-    type: Number,
-    default: 0,
-  },
-
-  downloads: {
-    type: Number,
-    default: 0,
-  },
-},
+    stats: {
+      views: {
+        type: Number,
+        default: 0,
+      },
+      downloads: {
+        type: Number,
+        default: 0,
+      },
+    },
   },
   {
     timestamps: true,
   }
 );
+
+movieSchema.index({ owner: 1, createdAt: -1 });
+movieSchema.index({ status: 1 });
 
 module.exports = mongoose.model("Movie", movieSchema);

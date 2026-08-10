@@ -79,5 +79,3 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
 };
 
 module.exports = mongoose.model("User", userSchema);
-console.log("Methods:", Object.keys(userSchema.methods));
-module.exports = mongoose.model("User", userSchema);

@@ -4,7 +4,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 
 const helmet = require("helmet");
-const cors = require("cors");
+
 const rateLimit = require("express-rate-limit");
 
 const app = express();
@@ -33,7 +33,20 @@ app.use(express.json());
 
 app.use(helmet());
 
-app.use(cors());
+const cors = require("cors");
+
+app.use(
+    cors({
+        origin:[ "http://localhost:5173",
+        
+        "http://localhost:5174",
+        ],
+        
+        
+    })
+);
+
+app.use(express.json());
 
 app.use(
   rateLimit({

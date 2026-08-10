@@ -1,28 +1,24 @@
-const Groq = require("groq-sdk");
+const { getCompletionText } = require("../utils/groqClient");
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY
-});
-
-
-const generateStory = async (prompt) => {
-
-    const completion = await groq.chat.completions.create({
-        messages:[
-            {
-                role:"user",
-                content:prompt
-            }
-        ],
-        model:"llama-3.1-8b-instant"
-    });
-
-
-    return completion.choices[0].message.content;
-
-}
 const analyzeMovie = async (movie) => {
-    const prompt = `
+  const mediaSummary = [
+    movie.photos?.length
+      ? `Photos: ${movie.photos.map((p) => p.description || "photo").join(", ")}`
+      : null,
+    movie.videos?.length
+      ? `Videos: ${movie.videos.map((v) => v.description || "video").join(", ")}`
+      : null,
+    movie.audio?.length
+      ? `Audio clips: ${movie.audio.length}`
+      : null,
+    movie.chatScreenshots?.length
+      ? `Chat screenshots: ${movie.chatScreenshots.length}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const prompt = `
 You are an expert AI Memory Movie Assistant.
 
 Analyze the following movie information and generate meaningful content.
@@ -33,20 +29,8 @@ ${movie.title}
 Theme:
 ${movie.theme}
 
-Memories:
-${movie.memories}
-
-Photos Uploaded:
-${movie.photos.length}
-
-Videos Uploaded:
-${movie.videos.length}
-
-Audio Uploaded:
-${movie.audio.length}
-
-Chat Screenshots Uploaded:
-${movie.chatScreenshots.length}
+Media:
+${mediaSummary || "No media uploaded yet"}
 
 Return ONLY a valid JSON object.
 
@@ -73,26 +57,21 @@ JSON format:
 }
 `;
 
-
-
-    const completion = await groq.chat.completions.create({
-        model: "llama-3.1-8b-instant",
-        messages: [
-            {
-                role: "user",
-                content: prompt
-            }
-        ],
-        temperature: 0.7
-    });
-
-    return completion.choices[0].message.content;
-
+  return getCompletionText({
+    model: "llama-3.1-8b-instant",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.7,
+  });
 };
 
-
+const generateStory = async (prompt) => {
+  return getCompletionText({
+    model: "llama-3.1-8b-instant",
+    messages: [{ role: "user", content: prompt }],
+  });
+};
 
 module.exports = {
-    generateStory,
-    analyzeMovie
+  generateStory,
+  analyzeMovie,
 };

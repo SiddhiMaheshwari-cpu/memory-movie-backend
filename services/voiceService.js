@@ -9,6 +9,13 @@ const generateVoice = async (text) => {
         try {
 
             console.log("Generating Voice...");
+            const cleanText = text
+    .replace(/\s+/g, " ")
+    .replace(/\.\s*\./g, ".")
+    .trim();
+
+console.log("🎙 Clean Narration Text:");
+console.log(cleanText);
 
 
             const fileName =
@@ -25,7 +32,7 @@ const generateVoice = async (text) => {
 
             const gtts =
                 new gTTS(
-                    text,
+                    cleanText,
                     "en"
                 );
 

@@ -227,8 +227,9 @@ const router = express.Router();
 const upload = require("../middleware/upload");
 const { protect } = require("../middleware/auth.middleware");
 const cloudinary = require("../config/cloudinary");
+
 const {
-  uploadFile,
+  
   uploadPhotoToMovie,
   deletePhoto,
   uploadVideoToMovie,
@@ -238,13 +239,12 @@ const {
     uploadChatScreenshotToMovie,deleteChatScreenshot
 } = require("../controllers/uploadController");
 
-router.post("/upload", upload.single("file"), uploadFile);
-router.post("/movies/:id/photos", upload.single("file"), uploadPhotoToMovie);
-router.delete("/movies/:movieId/photos/:photoId", deletePhoto);
-router.post("/movies/:id/videos", protect, upload.single("file"), uploadVideoToMovie);
-router.delete("/movies/:movieId/videos/:videoId", deleteVideo);
-router.post("/movies/:id/audio", protect, upload.single("file"), uploadAudioToMovie);
-router.delete("/movies/:movieId/audio/:audioId", deleteAudio);
-router.post("/movies/:id/chat-screenshots", protect, upload.single("file"), uploadChatScreenshotToMovie);
-router.delete("/movies/:movieId/chat-screenshots/:screenshotId", deleteChatScreenshot);
+router.post("/movies/:id/photos", upload.array("file",40), protect, uploadPhotoToMovie);
+router.delete("/movies/:movieId/photos/:photoId", protect, deletePhoto);
+router.post("/movies/:id/videos", upload.array("file",40), protect, uploadVideoToMovie);
+router.delete("/movies/:movieId/videos/:videoId", protect, deleteVideo);
+router.post("/movies/:id/audio", upload.array("file",40), protect, uploadAudioToMovie);
+router.delete("/movies/:movieId/audio/:audioId", protect, deleteAudio);
+router.post("/movies/:id/chat-screenshots", upload.array("file",40), protect, uploadChatScreenshotToMovie);
+router.delete("/movies/:movieId/chat-screenshots/:screenshotId", protect, deleteChatScreenshot);
 module.exports = router;

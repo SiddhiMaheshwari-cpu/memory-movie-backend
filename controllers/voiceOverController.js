@@ -1,17 +1,12 @@
 const Movie = require("../models/movieModel");
 const { generateVoiceOver } = require("../services/voiceOverService");
 const { parseAIResponse } = require("../utils/parser");
+
 const createVoiceOver = async (req, res) => {
   try {
-    const movie = await Movie.findById(req.params.id);
+    const movie = req.movie;
 
-    if (!movie) {
-      return res.status(404).json({
-        success: false,
-        message: "Movie not found",
-      });
-    }
-  const prompt = `You are writing a nostalgic personal memory narration.
+    const prompt = `You are writing a nostalgic personal memory narration.
 
 Write like a real human remembering moments.
 
@@ -27,8 +22,6 @@ Add natural pauses.
 
 Make it emotional but simple.
 
-
-
 Create a voice-over narration for each movie scene.
 
 Movie Title:
@@ -41,7 +34,7 @@ Story:
 ${movie.story}
 
 Scenes:
-${movie.screenplay.scenes
+${movie.screenplay?.scenes
   ?.map(
     (scene) => `
 Scene ${scene.sceneNumber}
@@ -72,22 +65,23 @@ Rules:
 `;
 
     const response = await generateVoiceOver(prompt);
-
     const voiceOver = parseAIResponse(response);
 
     movie.voiceOver = voiceOver;
-
     await movie.save();
 
-    movie.voiceOver = voiceOver;
-
-    await movie.save();
+    res.status(200).json({
+      success: true,
+      message: "Voice-over generated successfully",
+      data: { voiceOver },
+    });
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to generate voice-over",
+      error: error.message,
     });
   }
 };

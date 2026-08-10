@@ -1,136 +1,306 @@
 const path = require("path");
+
 const { collectMedia } = require("./mediaCollector");
+
 const { composeScenes } = require("./sceneComposerService");
-const { applyTransitions } = require("./transitionService");
+
 const { applyBackgroundMusic } = require("./backgroundMusicService");
+
 const { renderMovie } = require("./videoRendererService");
+
 const { uploadVideo } = require("../videoUploaderService");
 
 const { generateScreenplay } = require("../screenplay");
+
 const { generateVoice } = require("../voiceService");
+
 const { recommendMusic } = require("../musicService");
+
 const { getMusicTracks } = require("../musicProviderService");
 
 const createMovie = async (movie) => {
   try {
-    console.log("Movie Engine Started...");
+    console.log("\n================================");
+    console.log("🎬 MOVIE ENGINE STARTED");
+    console.log("================================");
 
-    // 1. Collect Media
+    // =====================================================
+    // 1. COLLECT ALL MEDIA
+    // =====================================================
 
-    const media = collectMedia(movie);
-    console.log("TOTAL MEDIA:", media.length);
+    const collectedMedia = collectMedia(movie);
 
-    media.forEach((item, index) => {
-      console.log(index, item.type, item.url);
+    if (!collectedMedia || !Array.isArray(collectedMedia.visualMedia)) {
+      throw new Error("Media collection failed. visualMedia is missing.");
+    }
+
+    const visualMedia = collectedMedia.visualMedia;
+
+    const audioMedia = Array.isArray(collectedMedia.audioMedia)
+      ? collectedMedia.audioMedia
+      : [];
+
+    console.log("\n================================");
+    console.log("📦 MEDIA COLLECTION RESULT");
+    console.log("================================");
+
+    console.log("Visual Media:", visualMedia.length);
+
+    console.log("Audio Media:", audioMedia.length);
+
+    visualMedia.forEach((item, index) => {
+      console.log(`${index + 1}.`, item.type, item.url);
     });
 
-    console.log("Media Collected:", media.length);
+    // Safety check
 
-    // 2. Generate AI Screenplay
+    if (visualMedia.length === 0) {
+      throw new Error("No visual media available for movie rendering.");
+    }
+
+    // =====================================================
+    // 2. GENERATE AI SCREENPLAY
+    // =====================================================
+
+    console.log("\n================================");
+    console.log("🤖 GENERATING AI SCREENPLAY");
+    console.log("================================");
+
+    const screenplay = await generateScreenplay(visualMedia);
 
     if (
-      !movie.screenplay ||
-      !movie.screenplay.scenes ||
-      movie.screenplay.scenes.length === 0
+      !screenplay ||
+      !Array.isArray(screenplay.scenes) ||
+      screenplay.scenes.length === 0
     ) {
-      console.log("Generating AI Screenplay...");
-
-      const screenplay = await generateScreenplay(media);
-
-      movie.screenplay = screenplay;
-
-      await movie.save();
-
-      console.log("Screenplay Saved");
+      throw new Error("AI screenplay generated no scenes.");
     }
 
-    // 3. Create Scenes
+    movie.screenplay = screenplay;
 
-    let scenes = composeScenes(movie.screenplay, media);
+    await movie.save();
 
-    console.log("Scenes Created:", scenes.length);
-    console.log(
-      scenes.map((s) => ({
-        title: s.title,
-        media: s.media?.url,
-      })),
+    console.log("✅ Screenplay Saved");
+
+    console.log("AI Scene Count:", screenplay.scenes.length);
+
+    // =====================================================
+    // 3. COMPOSE SCENES
+    // =====================================================
+
+    console.log("\n================================");
+    console.log("🎬 COMPOSING SCENES");
+    console.log("================================");
+
+    let scenes = composeScenes(
+      {
+        scenes: screenplay.scenes,
+      },
+      visualMedia,
     );
 
-    // Check scenes before further processing
-
-    if (scenes.length === 0) {
-      throw new Error("No scenes available");
+    if (!Array.isArray(scenes) || scenes.length === 0) {
+      throw new Error("No scenes were created from screenplay.");
     }
 
-    // 4. Apply Transitions
+    console.log("Scenes Created:", scenes.length);
 
-    scenes = applyTransitions(scenes);
+    scenes.forEach((scene, index) => {
+      console.log(`Scene ${index + 1}:`, {
+        title: scene.title,
+        mediaType: scene.media?.type,
+        mediaUrl: scene.media?.url,
+        duration: scene.duration,
+        animation: scene.animation,
+        transition: scene.transition,
+      });
+    });
 
-    // 5. Apply Background Music
+    // =====================================================
+    // 4. CINEMATIC SCENE DEFAULTS
+    // =====================================================
+
+    scenes = scenes.map((scene, index) => {
+      return {
+        ...scene,
+
+        // -----------------------------------------
+        // Animation
+        // -----------------------------------------
+
+        animation: scene.animation || {
+          type: "slow_zoom_in",
+
+          intensity: "medium",
+        },
+
+        // -----------------------------------------
+        // Transition
+        // -----------------------------------------
+
+        transition: scene.transition || {
+          type: index === 0 ? "none" : "fade",
+
+          duration: index === 0 ? 0 : 0.8,
+        },
+
+        // -----------------------------------------
+        // Caption
+        // -----------------------------------------
+
+        caption: scene.caption || {
+          text: "",
+
+          position: "bottom",
+        },
+
+        // -----------------------------------------
+        // Importance
+        // -----------------------------------------
+
+        importance: scene.importance || 0.5,
+
+        // -----------------------------------------
+        // Background Music
+        // -----------------------------------------
+
+        backgroundMusic: null,
+      };
+    });
+
+    console.log("\n================================");
+    console.log("🎞️ ENHANCED SCENES");
+    console.log("================================");
+
+    console.log(JSON.stringify(scenes, null, 2));
+
+    // =====================================================
+    // 5. BACKGROUND MUSIC
+    // =====================================================
+
+    console.log("\n================================");
+    console.log("🎵 APPLYING MUSIC LOGIC");
+    console.log("================================");
 
     scenes = applyBackgroundMusic(scenes);
 
-    console.log("Final Scenes Ready");
+    if (!Array.isArray(scenes)) {
+      throw new Error(
+        "Background music service must return an array of scenes.",
+      );
+    }
 
-    console.log(scenes);
+    console.log("✅ Background Music Applied");
 
-    // 6. AI Music Recommendation
+    // =====================================================
+    // 6. AI MUSIC RECOMMENDATION
+    // =====================================================
 
-    const musicRecommendation = await recommendMusic(scenes[0]);
+    console.log("\n================================");
+    console.log("🎼 AI MUSIC RECOMMENDATION");
+    console.log("================================");
 
-    console.log("AI Music Recommendation:", musicRecommendation);
+    const primaryScene = scenes[0];
 
-    // 7. Fetch Music
+    const musicRecommendation = await recommendMusic(primaryScene);
+
+    console.log("Music Recommendation:", musicRecommendation);
+
+    // =====================================================
+    // 7. FETCH MUSIC TRACKS
+    // =====================================================
 
     const musicTracks = await getMusicTracks(musicRecommendation);
 
-    console.log("Recommended Tracks:", musicTracks);
+    console.log("Music Tracks:", musicTracks);
 
     movie.musicRecommendations = musicTracks;
 
-    // Attach music URL
+    // Attach first suitable music track
+
+    const selectedMusic =
+      Array.isArray(musicTracks) && musicTracks.length > 0
+        ? musicTracks[0]?.audioUrl
+        : null;
 
     scenes.forEach((scene) => {
-      scene.backgroundMusic = musicTracks[0]?.audioUrl || null;
+      scene.backgroundMusic = selectedMusic || null;
     });
 
     await movie.save();
 
-    console.log("Music Attached To Scenes");
+    console.log("Selected Music:", selectedMusic);
 
-    // 8. Generate Voice
+    // =====================================================
+    // 8. GENERATE NARRATION
+    // =====================================================
 
-    const narrationText = scenes.map((scene) => scene.narration).join(" ");
+    console.log("\n================================");
+    console.log("🎙️ GENERATING NARRATION");
+    console.log("================================");
+
+    const narrationText = scenes
+      .map((scene) => scene.narration || "")
+      .filter((text) => text.trim().length > 0)
+      .join(". ");
 
     let voicePath = null;
 
-    if (narrationText) {
+    if (narrationText && narrationText.trim().length > 0) {
+      console.log("🎙 FINAL NARRATION TEXT:");
+      console.log(narrationText);
+
       voicePath = await generateVoice(narrationText);
     }
 
     console.log("Voice Path:", voicePath);
 
-    // 9. Render Video
+    // =====================================================
+    // 9. SELECT MUSIC FOR FINAL RENDER
+    // =====================================================
+
+    const musicPath =
+      scenes.find((scene) => scene.backgroundMusic)?.backgroundMusic || null;
+
+    console.log("Music Path:", musicPath);
+
+    // =====================================================
+    // 10. RENDER MOVIE
+    // =====================================================
+
+    console.log("\n================================");
+    console.log("🎥 STARTING VIDEO RENDER");
+    console.log("================================");
 
     const outputPath = path.join(__dirname, "finalMovie.mp4");
+
     const videoPath = await renderMovie({
       scenes,
+
       voicePath,
-      musicPath: scenes[0]?.backgroundMusic || null,
+
+      musicPath,
+
       outputPath,
     });
 
-    console.log("Video Rendered:", videoPath);
+    console.log("✅ Video Rendered:", videoPath);
 
-    // 10. Upload Video To Cloudinary
+    // =====================================================
+    // 11. UPLOAD TO CLOUDINARY
+    // =====================================================
 
-    console.log("Uploading Video To Cloudinary...");
+    console.log("\n================================");
+    console.log("☁️ UPLOADING VIDEO");
+    console.log("================================");
 
     const uploadedVideo = await uploadVideo(videoPath);
 
-    console.log("Cloudinary Video URL:", uploadedVideo.url);
+    console.log("Cloudinary URL:", uploadedVideo.url);
 
-    // 11. Return Result
+    // =====================================================
+    // 12. RETURN RESULT
+    // =====================================================
 
     return {
       videoUrl: uploadedVideo.url,
@@ -138,7 +308,15 @@ const createMovie = async (movie) => {
       publicId: uploadedVideo.publicId,
     };
   } catch (error) {
-    console.log("Movie Engine Error:", error);
+    console.error("\n================================");
+
+    console.error("❌ MOVIE ENGINE ERROR");
+
+    console.error("================================");
+
+    console.error(error);
+
+    console.error("Message:", error.message);
 
     throw error;
   }

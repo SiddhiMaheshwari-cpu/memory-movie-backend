@@ -1,13 +1,13 @@
 const Movie = require("../models/movieModel");
 const { createMovie } = require("../services/movieEngine/movieRendererService");
-const {
-  uploadRenderMovie,
-} = require("../services/uploadRenderMovieService");
 
 const renderMovie = async (req, res) => {
   try {
     const { movieId } = req.params;
 
+    console.log("🎬 Rendering Movie:", movieId);
+
+    // 1. Find movie
     const movie = await Movie.findById(movieId);
 
     if (!movie) {
@@ -17,23 +17,34 @@ const renderMovie = async (req, res) => {
       });
     }
 
-    const videoPath = await createMovie(movie);
+    // 2. Render + upload movie
+    // createMovie already uploads the final video to Cloudinary
+    const result = await createMovie(movie);
 
-    const uploadedMovie = await uploadRenderMovie(videoPath);
+    console.log("🎥 Movie Engine Result:", result);
 
-    movie.movieUrl = uploadedMovie.secure_url;
+    // 3. Save Cloudinary URL
+    movie.movieUrl = result.videoUrl;
+
+    // 4. Update movie status
+    movie.status = "completed";
+    movie.progress = 100;
 
     await movie.save();
 
-    res.status(200).json({
+    // 5. Response
+    return res.status(200).json({
       success: true,
       message: "Movie rendered and uploaded successfully",
-      movieUrl: movie.movieUrl,
+      movieId: movie._id,
+      movieUrl: result.videoUrl,
+      publicId: result.publicId,
     });
-  } catch (error) {
-    console.log(error);
 
-    res.status(500).json({
+  } catch (error) {
+    console.log("❌ Render Movie Controller Error:", error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

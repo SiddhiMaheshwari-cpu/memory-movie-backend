@@ -1,0 +1,31 @@
+:root {
+  /* ========= COLORS ========= */
+
+  --bg-primary: #090b14;
+  --bg-secondary: #10131d;
+  --bg-surface: rgba(18, 22, 33, 0.72);
+
+  --text-primary: #F5F7FA;
+  --text-secondary: #A7AFBF;
+
+  --border: rgba(255,255,255,.08);
+
+  /* Cinematic Accent */
+  --accent: #C8A96A;
+  --accent-light: #E6D2A2;
+
+  /* Glass */
+  --glass-bg: rgba(255,255,255,.04);
+  --glass-border: rgba(255,255,255,.08);
+
+  /* Shadows */
+  --shadow-soft: 0 15px 40px rgba(0,0,0,.35);
+
+  /* Radius */
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+
+  /* Animation */
+  --transition: .35s ease;
+}

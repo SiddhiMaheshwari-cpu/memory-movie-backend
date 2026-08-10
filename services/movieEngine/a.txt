@@ -1,0 +1,115 @@
+const createSceneVideo = (mediaPath, outputPath, duration = 5) => {
+  return new Promise((resolve, reject) => {
+
+    const ext = path.extname(mediaPath).toLowerCase();
+
+    console.log("🎬 Creating cinematic scene");
+    console.log("Input:", mediaPath);
+
+
+    const command = ffmpeg(mediaPath);
+
+
+    // Images ko loop karna
+    if (
+      [".jpg", ".jpeg", ".png", ".webp"]
+      .includes(ext)
+    ) {
+      command.inputOptions([
+        "-loop 1"
+      ]);
+    }
+
+
+    command
+
+      // FINAL MOVIE FORMAT
+      .outputOptions([
+
+        "-t",
+        duration.toString(),
+
+
+        // 30 FPS
+        "-r",
+        "30",
+
+
+        /*
+          IMPORTANT PART
+
+          Convert everything into:
+          1080 x 1920
+
+          Without stretching
+
+        */
+
+        "-vf",
+
+        `
+        scale=1080:1920:
+        force_original_aspect_ratio=decrease,
+        pad=1080:1920:
+        (ow-iw)/2:
+        (oh-ih)/2
+        `
+        .replace(/\s+/g,""),
+
+
+        // mobile compatible
+        "-pix_fmt",
+        "yuv420p",
+
+
+        "-c:v",
+        "libx264",
+
+
+        "-preset",
+        "medium"
+
+      ])
+
+
+      .on("start",(cmd)=>{
+
+        console.log(
+          "FFMPEG COMMAND:"
+        );
+
+        console.log(cmd);
+
+      })
+
+
+      .on("end",()=>{
+
+        console.log(
+          "✅ Scene rendered:",
+          outputPath
+        );
+
+        resolve();
+
+      })
+
+
+      .on("error",(err)=>{
+
+        console.log(
+          "❌ Scene error"
+        );
+
+        console.log(err);
+
+        reject(err);
+
+      })
+
+
+      .save(outputPath);
+
+
+  });
+};
