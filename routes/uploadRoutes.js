@@ -237,7 +237,7 @@ const {
     uploadAudioToMovie,
     deleteAudio,
     uploadChatScreenshotToMovie,deleteChatScreenshot
-} = require("../controllers/uploadController");
+} = require("../controllers/uploadcontroller");
 
 router.post("/movies/:id/photos", upload.array("file",40), protect, uploadPhotoToMovie);
 router.delete("/movies/:movieId/photos/:photoId", protect, deletePhoto);
