@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CloudUpload, Cpu, Film } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Navbar from "../../components/Navbar/Navbar";
-import Hero from "../../components/Hero/Hero";
+import Hero from "../../components/Hero/hero";
 import "./Landing.css";
 
 function Landing() {
