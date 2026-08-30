@@ -48,21 +48,45 @@
  *       404:
  *         description: Movie not found
  */
+
+/**
+ * @swagger
+ * /movies/{id}/render:
+ *   post:
+ *     summary: Render final cinematic movie
+ *     description: Render the compiled scene plan and audio into a final MP4 video using Remotion and Edge-TTS.
+ *     tags: [AI]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Movie rendered successfully
+ *       404:
+ *         description: Movie not found
+ */
+
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middleware/auth.middleware");
 const { createScreenplay } = require("../controllers/screenplayController");
 
+// Import the new renderMovieController along with analyzeMemory
 const {
-    analyzeMemory
-}=require("../controllers/aiController");
+    analyzeMemory,
+    renderMovieController
+} = require("../controllers/aiController");
 
-
-router.post(
-    "/movies/:id/analyze",protect,
-    analyzeMemory
-);
+// Routes
+router.post("/movies/:id/analyze", protect, analyzeMemory);
 router.post("/movies/:id/screenplay", protect, createScreenplay);
 
+// NEW: Cinematic Render Route
+router.post("/movies/:id/render", protect, renderMovieController);
 
 module.exports = router;

@@ -7,9 +7,9 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Studio from "../pages/Studio/Studio";
 import Preview from "../pages/Preview/Preview";
 import Upload from "../pages/upload/upload";
+import SignOut from "../pages/SignOut/SignOut";
 
 import ProtectedRoute from "./ProtectedRoute";
-
 
 function AppRoutes() {
     return (
@@ -19,8 +19,19 @@ function AppRoutes() {
 
             <Route path="/login" element={<Login />} />
 
+            {/* Support both /register and /signup */}
             <Route path="/register" element={<Register />} />
+            <Route path="/signup" element={<Register />} />
 
+            {/* Synchronized with backend logout route */}
+            <Route
+                path="/logout"
+                element={
+                    <ProtectedRoute>
+                        <SignOut />
+                    </ProtectedRoute>
+                }
+            />
 
             <Route
                 path="/dashboard"
@@ -31,7 +42,6 @@ function AppRoutes() {
                 }
             />
 
-
             <Route
                 path="/studio"
                 element={
@@ -41,7 +51,6 @@ function AppRoutes() {
                 }
             />
 
-
             <Route
                 path="/preview"
                 element={
@@ -50,7 +59,6 @@ function AppRoutes() {
                     </ProtectedRoute>
                 }
             />
-
 
             <Route
                 path="/upload"
@@ -64,6 +72,5 @@ function AppRoutes() {
         </Routes>
     );
 }
-
 
 export default AppRoutes;

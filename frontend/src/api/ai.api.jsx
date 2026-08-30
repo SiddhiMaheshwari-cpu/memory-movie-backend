@@ -12,6 +12,6 @@ export const generateScenePlan = (movieId) => {
     return api.post(`/movies/${movieId}/scene-plan`);
 };
 
-export const renderMovie = (movieId) => {
-    return api.post(`/movies/render/${movieId}`);
+export const renderMovie = (movieId,theme) => {
+    return api.post(`/movies/render/${movieId}`,{theme:theme});
 };

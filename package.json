@@ -14,12 +14,15 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@react-three/drei": "^10.7.8",
+    "@remotion/bundler": "^4.0.515",
+    "@remotion/renderer": "^4.0.515",
     "axios": "^1.19.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "edge-tts-universal": "^1.4.0",
     "elevenlabs": "^1.59.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.1",
@@ -33,9 +36,12 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.8.1",
     "multer": "^2.2.0",
+    "remotion": "^4.0.515",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
-    "validator": "^13.15.35"
+    "validator": "^13.15.35",
+    "webpack": "^5.109.2",
+    "webpack-cli": "^7.2.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

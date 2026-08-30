@@ -1,98 +1,29 @@
-.landing {
-  position: relative;
-  min-height: 100vh;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:wght@500;600;700&display=swap');
 
-  overflow: hidden;
-
-  background:
-      radial-gradient(circle at top left,
-      rgba(255,255,255,.03),
-      transparent 35%),
-
-      radial-gradient(circle at top right,
-      rgba(255,255,255,.02),
-      transparent 40%),
-
-      #090B14;
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  color: #e5e2e1;
+  background-color: #05090a;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-.landing__background{
-    position:absolute;
-
-    inset:0;
-
-    overflow:hidden;
-
-    z-index:0;
-}
-.light{
-
-position:absolute;
-
-border-radius:50%;
-
-filter:blur(140px);
-
-opacity:.35;
-
-animation:float 12s ease-in-out infinite;
-
-}
-.light-one{
-
-width:650px;
-height:650px;
-
-left:-220px;
-top:-180px;
-
-background:#202B45;
-
+.font-serif {
+  font-family: 'Playfair Display', serif !important;
 }
 
-.light-two{
-
-width:550px;
-height:550px;
-
-right:-180px;
-top:-100px;
-
-background:#243650;
-
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.light-three{
-
-width:700px;
-height:700px;
-
-left:50%;
-bottom:-320px;
-
-transform:translateX(-50%);
-
-background:#141D33;
-
-}
-@keyframes float{
-
-0%{
-
-transform:translateY(0px);
-
-}
-
-50%{
-
-transform:translateY(-35px);
-
-}
-
-100%{
-
-transform:translateY(0px);
-
-}
-
+/* Added for the button shine effect */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }

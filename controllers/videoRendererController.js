@@ -4,8 +4,10 @@ const { createMovie } = require("../services/movieEngine/movieRendererService");
 const renderMovie = async (req, res) => {
   try {
     const { movieId } = req.params;
+    const { theme } = req.body; // 👈 1. WE EXTRACT THE THEME HERE!
 
-    console.log("🎬 Rendering Movie:", movieId);
+    console.log(`\n🎬 Rendering Movie: ${movieId}`);
+    console.log(`🎛️ Director Theme Selected: ${theme || "Cinematic & Emotional"}`);
 
     // 1. Find movie
     const movie = await Movie.findById(movieId);
@@ -18,8 +20,8 @@ const renderMovie = async (req, res) => {
     }
 
     // 2. Render + upload movie
-    // createMovie already uploads the final video to Cloudinary
-    const result = await createMovie(movie);
+    // 👈 2. WE PASS THE THEME INTO THE ENGINE HERE!
+    const result = await createMovie(movie, theme);
 
     console.log("🎥 Movie Engine Result:", result);
 
