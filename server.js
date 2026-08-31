@@ -36,18 +36,16 @@ app.use(helmet());
 const cors = require("cors");
 
 app.use(
-    cors({
-        origin:[ "http://localhost:5173",
-        
-        "http://localhost:5174",
-        "https://memory-movie-backend-8war.vercel.app",
-        ],
-        credentials:true,
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"]
-        
-        
-    })
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://memory-movie-backend-wkec-q0ysrs24e.vercel.app" // <-- Yeh aapka naya link
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
 );
 
 app.use(express.json());
