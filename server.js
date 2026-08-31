@@ -40,7 +40,8 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://memory-movie-backend-wkec-q0ysrs24e.vercel.app" // <-- Yeh aapka naya link
+      "https://memory-movie-backend-wkec-q0ysrs24e.vercel.app" 
+      "https://memory-movie-backend-fk4r-nzol0us8s.vercel.app" <-- Yeh aapka naya link
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
