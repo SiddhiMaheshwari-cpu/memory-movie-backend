@@ -64,7 +64,6 @@ const createSceneVideo = (imagePath, duration, animationType, outputPath) => {
 
     const safeDuration = duration || 5;
 
-    // Completely avoid -loop command to bypass "Option loop not found"
     ffmpeg()
       .input(imagePath)
       .inputFPS(1 / safeDuration)
@@ -75,9 +74,9 @@ const createSceneVideo = (imagePath, duration, animationType, outputPath) => {
             z: zoomExpression,
             x: xExpression,
             y: "ih/2-(ih/zoom/2)",
-            d: safeDuration * 25,
-            s: "1920x1080",
-            fps: 25
+            d: safeDuration * 15, // 📉 FPS kam kiya (RAM bachane ke liye)
+            s: "640x360",         // 📉 Resolution kam kiya (Huge RAM savings!)
+            fps: 15               // 📉 FPS 15 kiya
           },
           inputs: "0:v",
           outputs: "composedScene"
@@ -88,9 +87,12 @@ const createSceneVideo = (imagePath, duration, animationType, outputPath) => {
       .outputOptions([
         "-map", "[fadedScene]",
         "-c:v", "libx264",
+        "-preset", "ultrafast",   // 🚀 FASTEST Preset (Server crash hone se rokega)
+        "-crf", "28",             // 📉 Compression badhaya
+        "-threads", "1",          // 🛑 STRICT RAM CONTROL (Sirf 1 thread use karega)
         "-pix_fmt", "yuv420p",
         "-t", safeDuration.toString(),
-        "-r", "25"
+        "-r", "15"                // 📉 Output FPS 15 kiya
       ])
       .on("end", () => resolve(outputPath))
       .on("error", (err) => reject(err))
@@ -162,40 +164,32 @@ const addAudioLayers = async (videoPath, voicePath, musicPath, srtPath, outputPa
         inputCount++;
       }
 
-      // 📝 Clean relative path (e.g., "public/captions-123.srt") avoids Windows username spaces and drive colons
       let escapedSrtPath = path.relative(process.cwd(), srtPath).replace(/\\/g, '/');
-      
-      // Styling: Cyan text, slight black transparent background box, centered at bottom
-      const subStyle = "FontName=Arial,FontSize=20,PrimaryColour=&H005DD8E2&,OutlineColour=&H00000000&,BackColour=&H80000000&,BorderStyle=1,Outline=2,Shadow=1,Alignment=2";
+      const subStyle = "FontName=Arial,FontSize=14,PrimaryColour=&H005DD8E2&,OutlineColour=&H00000000&,BackColour=&H80000000&,BorderStyle=1,Outline=2,Shadow=1,Alignment=2";
       const videoFilter = `subtitles='${escapedSrtPath}':force_style='${subStyle}'`;
+
+      const commonOutputOptions = [
+        "-vf", videoFilter,
+        "-c:v", "libx264", 
+        "-preset", "ultrafast", // 🚀 Ultrafast rendering
+        "-crf", "28",           // 📉 Quality thodi kam kari RAM bachane ko
+        "-threads", "1",        // 🛑 RAM LIMITER
+        "-c:a", "aac", 
+        "-b:a", "128k",         // 📉 Audio size kam kiya
+        "-t", videoDuration.toString(), 
+        "-movflags", "+faststart"
+      ];
 
       if (inputCount === 3) {
         filterComplex.push(
           `[1:a]volume=1.0[voice]; [2:a]volume=0.3[music]; [music][voice]sidechaincompress=threshold=0.05:ratio=4[musicDucked]; [voice][musicDucked]amix=inputs=2:duration=first,afade=t=out:st=${Math.max(0, videoDuration - 2)}:d=2[finalAudio]`
         );
         command.complexFilter(filterComplex);
-        command.outputOptions([
-          "-map", "0:v:0", "-map", "[finalAudio]",
-          "-vf", videoFilter,
-          "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-          "-c:a", "aac", "-b:a", "192k",
-          "-t", videoDuration.toString(), "-movflags", "+faststart"
-        ]);
+        command.outputOptions(["-map", "0:v:0", "-map", "[finalAudio]", ...commonOutputOptions]);
       } else if (inputCount === 2) {
-        command.outputOptions([
-          "-map", "0:v:0", "-map", "1:a:0",
-          "-vf", videoFilter,
-          "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-          "-c:a", "aac", "-b:a", "192k",
-          "-t", videoDuration.toString(), "-movflags", "+faststart"
-        ]);
+        command.outputOptions(["-map", "0:v:0", "-map", "1:a:0", ...commonOutputOptions]);
       } else {
-        command.outputOptions([
-          "-map", "0:v:0",
-          "-vf", videoFilter,
-          "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-          "-t", videoDuration.toString(), "-movflags", "+faststart"
-        ]);
+        command.outputOptions(["-map", "0:v:0", ...commonOutputOptions]);
       }
 
       command
