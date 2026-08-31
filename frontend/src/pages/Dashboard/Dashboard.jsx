@@ -217,7 +217,17 @@ function Dashboard() {
                       <span>{recentMovie?.theme || "Atmospheric"}</span>
                     </div>
                     
-                    <button className="backdrop-blur-md bg-white/10 border border-white/20 text-white font-medium px-8 py-3 rounded-full flex items-center gap-3 w-max hover:bg-white hover:text-black transition-all duration-300">
+                    {/* YAHAN BUTTON UPDATE KIYA GAYA HAI */}
+                    <button 
+                      onClick={() => {
+                        if (recentMovie && recentMovie.movieUrl) {
+                          window.open(recentMovie.movieUrl, "_blank");
+                        } else {
+                          alert("Movie abhi process ho rahi hai ya URL save nahi hua! Ek baar page refresh karein.");
+                        }
+                      }}
+                      className="backdrop-blur-md bg-white/10 border border-white/20 text-white font-medium px-8 py-3 rounded-full flex items-center gap-3 w-max hover:bg-white hover:text-black transition-all duration-300"
+                    >
                       <Play className="w-4 h-4 fill-current" /> Play Masterpiece
                     </button>
                   </div>
