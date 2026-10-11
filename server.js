@@ -34,13 +34,20 @@ app.use(express.json());
 app.use(helmet());
 
 const cors = require("cors");
+const cors = require('cors');
 
 app.use(cors({
-    origin: true,
+    origin: function (origin, callback) {
+        // Kisi bhi origin ko dynamically allow karne ke liye
+        return callback(null, true);
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
+
+// Preflight requests ke liye zaroori line
+app.options('*', cors());
 
 app.use(express.json());
 
