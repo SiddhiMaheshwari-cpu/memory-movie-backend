@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL:"https://memorymoviebackend-l7i6or5y.b4a.run"
+    baseURL: "https://memorymoviebackend-l7i6or5y.b4a.run"
 });
 
 api.interceptors.request.use(
